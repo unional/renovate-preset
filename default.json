@@ -1,3 +1,4 @@
 {
+  "description": "Preserving Semver",
   "extends": ["config:base", ":preserveSemverRanges"]
 }
