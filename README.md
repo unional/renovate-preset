@@ -20,12 +20,10 @@ no tag to move.
 
 - **Semver ranges are preserved** (`:preserveSemverRanges`) — a `^1.2.3` range
   stays a range; Renovate does not pin it.
-- **No prereleases once a dependency is on one.** `ignoreUnstable` only blocks
-  *stable to unstable*. Once a dependency is pinned to a prerelease, every later
-  prerelease of the same line reads as an ordinary patch and flows straight
-  through — that is how a `type-plus` 8.x beta reached eighteen published
-  packages. The preset closes it from the other side: while the current version
-  is a prerelease, only stable versions are candidates.
+- **No jump from a stable version onto a prerelease** (`ignoreUnstable`). A
+  dependency already tracking a prerelease line keeps getting that line's later
+  prereleases; the preset does not stand between a repo and a prerelease it has
+  deliberately adopted.
 - **A 24 hour release soak** (`minimumReleaseAge: "1 day"`), matching pnpm's
   supply-chain `minimumReleaseAge`. Without it Renovate proposes versions the
   install itself will refuse, and the resulting trickle of red PRs is pressure to
@@ -39,9 +37,9 @@ preset. Repos that want it set it locally.
 
 ### Overriding
 
-A consuming repo's own `packageRules` are applied after the preset's, so a repo
-that deliberately tracks a prerelease (or wants a different soak) overrides it
-locally:
+A consuming repo's own settings and `packageRules` are applied after the
+preset's, so a repo that wants a different soak, or a bound on one dependency,
+sets it locally:
 
 ```json
 {
@@ -49,13 +47,8 @@ locally:
   "packageRules": [
     {
       "matchPackageNames": ["typescript"],
-      "allowedVersions": null
+      "allowedVersions": "<6"
     }
   ]
 }
 ```
-
-One consequence of the prerelease guard worth knowing: a dependency with **no**
-stable line at all stops getting update PRs, since every candidate is a
-prerelease. Those show up on the dependency dashboard, and the override above is
-the way out.
