@@ -1,4 +1,17 @@
 {
-  "description": "Preserving Semver",
-  "extends": ["config:base", ":preserveSemverRanges"]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Preserving Semver, plus the protective policy every consuming repo was otherwise inlining: no prereleases once a dependency is on one, a release soak matching pnpm's supply-chain setting, and rebase-when-behind.",
+  "extends": ["config:base", ":preserveSemverRanges"],
+  "ignoreUnstable": true,
+  "minimumReleaseAge": "1 day",
+  "internalChecksFilter": "strict",
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "description": "Prerelease guard. `ignoreUnstable` only blocks stable -> unstable: once a dependency is pinned to a prerelease, every later prerelease of the same line reads as an ordinary patch and flows straight through. That is the mechanism by which a type-plus 8.x beta reached eighteen published packages. This closes it from the other side: while the current version is a prerelease, only stable versions are candidates. A dependency with no stable line at all therefore stops getting update PRs (they show on the dependency dashboard); a repo that deliberately tracks a prerelease overrides this with its own packageRule, which is applied after the preset's.",
+      "matchCurrentVersion": "/-/",
+      "matchPackageNames": ["*"],
+      "allowedVersions": "!/-/"
+    }
+  ]
 }
